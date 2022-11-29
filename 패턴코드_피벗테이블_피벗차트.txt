@@ -1,0 +1,83 @@
+Sub Visualization()
+'시각적 분석=피벗테이블+피벗차트
+    Dim pc As PivotCache
+    Dim pt As PivotTable
+    Dim pf As PivotField
+    Dim sh As Shape
+    Dim ch As Chart
+    Dim ws As Worksheet
+    
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+    
+    '기존 Dashboard 시트 삭제
+    On Error Resume Next
+    Sheets("Dashboard").Delete
+    On Error GoTo 0
+    
+    Sheets.Add.Name = "Dashboard"
+    Range("a3").Select
+    
+    Set pc = ThisWorkbook.PivotCaches.Create(xlDatabase, Sheet1.Range("a1").CurrentRegion)
+    Set pt = pc.CreatePivotTable(ActiveCell, "SalesPivot")
+    
+    'pivot Table
+    With pt
+        .AddFields "주문 일자"
+        .AddDataField .PivotFields("매출")
+        .RowAxisLayout xlTabularRow
+    
+        Set pf = .PivotFields("주문 일자")
+        pf.LabelRange.Group Start:=True, End:=True, Periods:=Array(False, False, False, _
+        False, True, False, False)
+        
+        .DataFields(1).NumberFormat = "#,#"
+    
+    End With
+    
+    '차트
+    Set ws = Sheets("Dashboard")
+    
+    '기존 차트 삭제
+    On Error Resume Next
+        ws.ChartObjects.Delete
+    On Error GoTo 0
+    
+    Set sh = ws.Shapes.AddChart2(, XlChartType.xlLine)
+    Set ch = sh.Chart
+    
+    '차트 요소
+    With ch
+        .SetSourceData pt.TableRange1
+        .ChartTitle.Text = "월별 매출추이"
+    
+        .ShowAllFieldButtons = False
+        .SetElement (msoElementLegendNone)
+        .SetElement (msoElementPrimaryValueGridLinesNone)
+        .SetElement (msoElementPrimaryValueAxisNone)
+        .FullSeriesCollection(1).ApplyDataLabels
+    
+    End With
+    
+    '차트 위치, 사이즈
+    With sh
+        .Top = pt.TableRange1.Top
+        .Left = pt.TableRange1.Left + pt.TableRange1.Width + 10
+        .Height = pt.TableRange1.Height
+        .Width = 600
+    
+    End With
+    
+    ActiveWindow.DisplayGridlines = False
+    
+    
+    Application.DisplayAlerts = True
+    Application.ScreenUpdating = True
+    
+    Set pc = Nothing
+    Set pt = Nothing
+    Set pf = Nothing
+    Set ws = Nothing
+    Set sh = Nothing
+    Set ch = Nothing
+End Sub

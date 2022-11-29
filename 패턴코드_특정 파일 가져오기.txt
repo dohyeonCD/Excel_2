@@ -1,0 +1,49 @@
+Sub GetData()
+'데이터 가져오기
+   Dim FN As String
+   Dim wb As Workbook
+   Dim ws As Worksheet
+   
+   Application.ScreenUpdating = False
+   
+   FN = Environ("userprofile") & "\OneDrive\바탕 화면\Superstore KR v2019.xlsx"
+      
+   If IsFileExist(FN) = False Then
+      MsgBox "파일이 존재하지 않습니다"
+      Exit Sub
+   End If
+   
+   If IsFileOpen(FN) = True Then
+      MsgBox "파일이 이미 열려 있습니다. 닫고 다시 시작하세요"
+      End
+   End If
+   
+   Set wb = Workbooks.Open(Filename:=FN, UpdateLinks:=0)
+   Set ws = wb.Sheets(1)
+   
+   'to do
+   
+
+   
+   wb.Close False
+   
+   Application.ScreenUpdating = True
+   
+   Set wb = Nothing
+   Set ws = Nothing
+   
+End Sub
+
+Function IsFileExist(FN As String) As Boolean
+   IsFileExist = (Dir(FN) <> "")
+
+End Function
+
+Function IsFileOpen(FN As String) As Boolean
+   Dim OpenFName As Workbook
+   
+   On Error Resume Next
+   Set OpenFName = Workbooks(Dir(FN))
+   IsFileOpen = (Err.Number = 0)
+
+End Function
